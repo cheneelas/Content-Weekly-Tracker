@@ -1,0 +1,600 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  .wrap{display:flex;font-family:'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;background:#fff;color:#333;min-height:600px;}
+  .sidebar{width:185px;flex-shrink:0;background:#f2f2f2;border-right:1px solid #e0e0e0;padding:1.25rem 1rem;overflow-y:auto;}
+  .sidebar-title{font-size:15px;font-weight:600;color:#333;margin-bottom:1rem;}
+  .sb-sec{font-size:10px;text-transform:uppercase;color:#999;letter-spacing:.06em;margin-bottom:5px;margin-top:1rem;}
+  .char-list{list-style:none;margin-bottom:.25rem;}
+  .char-list li{margin-bottom:3px;}
+  .char-btn{background:none;border:none;cursor:pointer;font-size:13px;color:#1e6bb8;padding:4px 6px;text-align:left;width:100%;border-radius:3px;transition:background .1s;}
+  .char-btn:hover{background:#e8e8e8;text-decoration:none;}
+  .char-btn.active{background:#fff;color:#333;font-weight:600;border:1px solid #d0d0d0;}
+  .char-btn.all-btn{color:#6a3db8;}
+  .char-btn.all-btn.active{color:#333;}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;margin-bottom:4px;}
+  .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .sched-note{font-size:10px;color:#777;line-height:1.6;margin-top:.25rem;}
+  .main{flex:1;padding:1.25rem 1.75rem;min-width:0;overflow:auto;}
+  .page-header{border-bottom:1px solid #e0e0e0;padding-bottom:.75rem;margin-bottom:1rem;}
+  .page-header h1{font-size:21px;font-weight:600;color:#333;margin-bottom:2px;}
+  .page-header p{font-size:12px;color:#777;}
+  .top-bar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+  .nav-btn{background:#fff;border:1px solid #d0d0d0;border-radius:3px;padding:4px 12px;font-size:13px;cursor:pointer;color:#333;font-family:inherit;}
+  .nav-btn:hover{background:#f5f5f5;}
+  .period-label{font-size:15px;font-weight:600;color:#333;min-width:160px;}
+  .view-tabs{display:flex;gap:4px;margin-left:auto;}
+  .view-tab{background:#fff;border:1px solid #d0d0d0;border-radius:3px;padding:4px 14px;font-size:12px;cursor:pointer;color:#555;font-family:inherit;}
+  .view-tab.active{background:#1e6bb8;border-color:#1e6bb8;color:#fff;}
+  .stat-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+  .stat-box{background:#f7f7f7;border:1px solid #e0e0e0;border-radius:3px;padding:6px 12px;font-size:12px;color:#555;}
+  .stat-box strong{font-size:15px;color:#333;display:block;}
+  .view-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;background:#f0eaff;color:#6a3db8;font-weight:600;margin-left:8px;vertical-align:middle;}
+
+  /* status badges */
+  .badge-sched{display:inline-block;font-size:10px;padding:1px 7px;border-radius:3px;background:#fff8e1;color:#b07c00;border:1px solid #f0c040;font-weight:600;}
+  .badge-posted{display:inline-block;font-size:10px;padding:1px 7px;border-radius:3px;background:#e8f4e8;color:#2a6e2a;border:1px solid #7ec87e;font-weight:600;}
+  .badge-none{display:inline-block;font-size:10px;padding:1px 7px;border-radius:3px;background:#f5f5f5;color:#bbb;border:1px solid #e0e0e0;}
+
+  /* month calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:1.25rem;}
+  .day-hdr{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#999;text-align:center;padding:3px 0;}
+  .day-cell{border:1px solid #e8e8e8;border-radius:3px;padding:5px 4px 6px;min-height:90px;cursor:pointer;background:#fff;transition:border-color .1s;}
+  .day-cell:hover{border-color:#aaa;background:#fafafa;}
+  .day-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+  .day-cell.istoday{border-color:#1e6bb8;}
+  .day-cell.issel{background:#f0f6ff;border-color:#1e6bb8;}
+  .day-cell.issel-ov{background:#faf5ff;border-color:#9b6bda;}
+  .day-num{font-size:11px;color:#999;margin-bottom:3px;font-weight:600;}
+  .istoday .day-num{color:#1e6bb8;}
+  .trk-row{margin-bottom:3px;}
+  .trk-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.04em;color:#bbb;margin-bottom:1px;display:flex;justify-content:space-between;}
+  .trk-lbl span{color:#888;font-weight:600;}
+  .bar-bg{background:#f0f0f0;border-radius:2px;height:5px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:2px;transition:width .2s;}
+  .fv{background:#5cb85c;} .fp{background:#5b9bd5;} .fsched{background:#f0c040;}
+
+  /* month overview */
+  .ov-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:1.25rem;}
+  .ov-cell{border:1px solid #e8e8e8;border-radius:3px;padding:5px 4px;min-height:108px;cursor:pointer;background:#fff;transition:border-color .1s;}
+  .ov-cell:hover{border-color:#aaa;}
+  .ov-cell.empty{background:transparent;border-color:transparent;cursor:default;}
+  .ov-cell.istoday{border-color:#1e6bb8;}
+  .ov-cell.issel-ov{background:#faf5ff;border-color:#9b6bda;}
+  .ov-dnum{font-size:11px;color:#999;margin-bottom:3px;font-weight:600;}
+  .ov-cell.istoday .ov-dnum{color:#1e6bb8;}
+  .mini-row{display:flex;align-items:center;gap:3px;margin-bottom:2px;}
+  .mini-lbl{font-size:8px;color:#999;width:26px;flex-shrink:0;overflow:hidden;white-space:nowrap;}
+  .mini-bars{flex:1;display:flex;flex-direction:column;gap:1px;}
+  .mini-bg{background:#f0f0f0;border-radius:1px;height:3px;overflow:hidden;}
+  .mini-fill{height:100%;border-radius:1px;}
+
+  /* week calendar */
+  .week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:1.25rem;}
+  .week-col{border:1px solid #e8e8e8;border-radius:3px;background:#fff;cursor:pointer;transition:border-color .1s;overflow:hidden;}
+  .week-col:hover{border-color:#aaa;background:#fafafa;}
+  .week-col.istoday{border-color:#1e6bb8;}
+  .week-col.issel{background:#f0f6ff;border-color:#1e6bb8;}
+  .week-col.issel-ov{background:#faf5ff;border-color:#9b6bda;}
+  .wk-top{padding:7px 7px 5px;border-bottom:1px solid #f0f0f0;}
+  .wk-dayname{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#aaa;}
+  .wk-dnum{font-size:18px;font-weight:600;color:#333;line-height:1.1;}
+  .week-col.istoday .wk-dnum{color:#1e6bb8;}
+  .wk-mon{font-size:9px;color:#aaa;margin-top:1px;}
+  .wk-body{padding:7px;}
+  .wk-trk{margin-bottom:5px;}
+  .wk-trk-lbl{font-size:10px;color:#999;display:flex;justify-content:space-between;margin-bottom:2px;}
+  .wk-trk-lbl span{font-weight:600;color:#555;}
+  .wk-bar-bg{background:#f0f0f0;border-radius:3px;height:7px;overflow:hidden;}
+  .wk-bar-fill{height:100%;border-radius:3px;transition:width .25s;}
+  .wk-nophoto{font-size:10px;color:#ddd;margin-top:3px;}
+
+  /* week overview */
+  .wov-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-bottom:1.25rem;}
+  .wov-col{border:1px solid #e8e8e8;border-radius:3px;background:#fff;cursor:pointer;transition:border-color .1s;overflow:hidden;}
+  .wov-col:hover{border-color:#aaa;}
+  .wov-col.istoday{border-color:#1e6bb8;}
+  .wov-col.issel-ov{background:#faf5ff;border-color:#9b6bda;}
+  .wov-top{padding:5px 7px;border-bottom:1px solid #f0f0f0;}
+  .wov-dnum{font-size:15px;font-weight:600;color:#333;line-height:1.1;}
+  .wov-col.istoday .wov-dnum{color:#1e6bb8;}
+  .wov-dsub{font-size:9px;color:#bbb;}
+  .wov-body{padding:5px 7px;}
+  .wov-crow{display:flex;align-items:center;gap:3px;margin-bottom:3px;}
+  .wov-clbl{font-size:8px;color:#888;width:28px;flex-shrink:0;}
+  .wov-bars{flex:1;display:flex;flex-direction:column;gap:1px;}
+
+  /* detail */
+  .detail{background:#fff;border:1px solid #e0e0e0;border-radius:3px;padding:1rem 1.25rem;}
+  .detail h2{font-size:15px;font-weight:600;color:#333;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid #eee;}
+  .detail-top{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+  .dstat{flex:1;min-width:110px;background:#f7f7f7;border:1px solid #e8e8e8;border-radius:3px;padding:8px 12px;}
+  .dstat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px;}
+  .dstat-val{font-size:14px;font-weight:600;}
+  .dbar-bg{background:#eee;border-radius:3px;height:7px;overflow:hidden;margin-top:4px;}
+  .dbar-fill{height:100%;border-radius:3px;transition:width .25s;}
+  .plat-table{width:100%;border-collapse:collapse;}
+  .plat-table th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#999;padding:5px 8px;text-align:left;border-bottom:1px solid #e8e8e8;}
+  .plat-table td{padding:6px 8px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#333;vertical-align:middle;}
+  .plat-table tr:last-child td{border-bottom:none;}
+  .plat-table tr:hover td{background:#fafafa;}
+  .status-btn{font-size:11px;padding:3px 9px;border-radius:3px;cursor:pointer;font-family:inherit;margin-right:4px;border:1px solid #d0d0d0;background:#fff;color:#777;}
+  .status-btn:hover{background:#f0f0f0;}
+  .status-btn.s-sched{background:#fff8e1;border-color:#f0c040;color:#b07c00;font-weight:600;}
+  .status-btn.s-posted{background:#e8f4e8;border-color:#7ec87e;color:#2a6e2a;font-weight:600;}
+  .ov-det-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1rem;}
+  .ov-ccard{background:#f7f7f7;border:1px solid #e8e8e8;border-radius:3px;padding:10px 12px;}
+  .ov-cname{font-size:12px;font-weight:600;color:#333;margin-bottom:6px;}
+  .ov-cbar-row{margin-bottom:4px;}
+  .ov-cbar-lbl{font-size:10px;color:#999;display:flex;justify-content:space-between;margin-bottom:2px;}
+  .ov-cbar-bg{background:#e8e8e8;border-radius:2px;height:5px;overflow:hidden;}
+  .ov-cbar-fill{height:100%;border-radius:2px;}
+  .no-sel{color:#999;font-size:13px;text-align:center;padding:1.5rem;}
+  .footer-note{font-size:11px;color:#bbb;margin-top:1.25rem;border-top:1px solid #eee;padding-top:.75rem;}
+</style>
+
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="sidebar-title">Post Calendar</div>
+
+    <div class="sb-sec">View</div>
+    <ul class="char-list">
+      <li><button class="char-btn all-btn" id="allBtn" onclick="switchChar(-1)">All Characters</button></li>
+    </ul>
+
+    <div class="sb-sec">Characters</div>
+    <ul class="char-list" id="charList"></ul>
+
+    <div class="sb-sec">Status</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f0c040"></div>Scheduled</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#5cb85c"></div>Posted (Video)</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#5b9bd5"></div>Posted (Photo)</div>
+
+    <div class="sb-sec">Schedule</div>
+    <div class="sched-note"><b>Video daily:</b><br>7 platforms<br><br><b>Photo alt. days:</b><br>5 platforms (odd dates)</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <h1 id="charHeading">Jenna</h1>
+      <p id="charSubhead">Social media post schedule tracker</p>
+    </div>
+    <div class="top-bar">
+      <button class="nav-btn" onclick="navBack()">&#8592; Prev</button>
+      <span class="period-label" id="periodLabel"></span>
+      <button class="nav-btn" onclick="navFwd()">Next &#8594;</button>
+      <div class="view-tabs">
+        <button class="view-tab active" id="tabMonth" onclick="setView('month')">Monthly</button>
+        <button class="view-tab" id="tabWeek" onclick="setView('week')">Weekly</button>
+      </div>
+    </div>
+    <div class="stat-row" id="statRow"></div>
+    <div id="calArea"></div>
+    <div id="detailPanel"></div>
+    <div class="footer-note">Click a day to log posts. Set each platform as <b>Scheduled</b> or <b>Posted</b>. Green bars = posted · Yellow bars = scheduled · Odd dates include photo posting.</div>
+  </main>
+</div>
+
+<script>
+const CHARS=['Jenna','Lila','Jill','Olivia','Hana','Kim'];
+const VP=['Bluesky','Facebook','Instagram','Threads','X','TikTok','YouTube'];
+const PP=['Bluesky','Facebook','Instagram','Threads','X'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+// status: null = none, 'scheduled', 'posted'
+
+let currentChar=0, view='month';
+let monthYear, monthMonth, weekStart, selectedDate=null;
+let allData={};
+const today=new Date(); today.setHours(0,0,0,0);
+monthYear=today.getFullYear(); monthMonth=today.getMonth();
+weekStart=getWeekStart(today);
+
+function getWeekStart(d){const t=new Date(d);t.setHours(0,0,0,0);t.setDate(t.getDate()-t.getDay());return t;}
+function mKey(ci,y,m){return `postTracker2_${CHARS[ci]}_${y}_${m}`;}
+
+async function loadM(ci,y,m){try{const r=await window.storage.get(mKey(ci,y,m));return r?JSON.parse(r.value):{};}catch{return {};}}
+async function saveM(ci,y,m,data){try{await window.storage.set(mKey(ci,y,m),JSON.stringify(data));}catch{}}
+
+function getMD(ci,y,m){return(allData[ci]&&allData[ci][`${y}_${m}`])||{};}
+function setMD(ci,y,m,d){if(!allData[ci])allData[ci]={};allData[ci][`${y}_${m}`]=d;}
+
+async function ensureLoaded(ci,y,m){
+  if(!allData[ci])allData[ci]={};
+  const k=`${y}_${m}`;
+  if(!allData[ci][k]){allData[ci][k]=await loadM(ci,y,m);}
+}
+async function ensureRange(y1,m1,y2,m2){
+  const jobs=[];
+  const chars=currentChar===-1?CHARS.map((_,i)=>i):[currentChar];
+  let y=y1,m=m1;
+  while(y<y2||(y===y2&&m<=m2)){
+    for(const ci of chars)jobs.push(ensureLoaded(ci,y,m));
+    m++;if(m>11){m=0;y++;}
+  }
+  await Promise.all(jobs);
+}
+
+function isPhotoDay(d){return d%2===1;}
+function getSched(d){return{video:VP,photo:isPhotoDay(d)?PP:[]};}
+function pct(a,b){return Math.round((a/(b||1))*100);}
+
+// Returns counts: posted, scheduled, total for video and photo
+function getDaySt(date,ci){
+  const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
+  const md=getMD(ci,y,m);
+  const e=(md[d])||{};
+  const s=getSched(d);
+  let vPosted=0,vSched=0,pPosted=0,pSched=0;
+  s.video.forEach(p=>{
+    const st=e[p]&&e[p].video;
+    if(st==='posted')vPosted++;
+    else if(st==='scheduled')vSched++;
+  });
+  s.photo.forEach(p=>{
+    const st=e[p]&&e[p].photo;
+    if(st==='posted')pPosted++;
+    else if(st==='scheduled')pSched++;
+  });
+  return{vPosted,vSched,pPosted,pSched,totV:s.video.length,totP:s.photo.length};
+}
+
+function getOverallSt(date){
+  let vPosted=0,vSched=0,pPosted=0,pSched=0,totV=0,totP=0;
+  for(let i=0;i<CHARS.length;i++){const s=getDaySt(date,i);vPosted+=s.vPosted;vSched+=s.vSched;pPosted+=s.pPosted;pSched+=s.pSched;totV+=s.totV;totP+=s.totP;}
+  return{vPosted,vSched,pPosted,pSched,totV,totP};
+}
+
+/* ── SIDEBAR ── */
+function renderSidebar(){
+  document.getElementById('allBtn').className='char-btn all-btn'+(currentChar===-1?' active':'');
+  document.getElementById('charList').innerHTML=CHARS.map((c,i)=>
+    `<li><button class="char-btn${i===currentChar?' active':''}" onclick="switchChar(${i})">${c}</button></li>`
+  ).join('');
+}
+
+/* ── HEADER ── */
+function renderHeader(){
+  if(currentChar===-1){
+    document.getElementById('charHeading').innerHTML='All Characters <span class="view-badge">Overview</span>';
+    document.getElementById('charSubhead').textContent='Combined tracker for all 6 characters';
+  } else {
+    document.getElementById('charHeading').textContent=CHARS[currentChar];
+    document.getElementById('charSubhead').textContent='Social media post schedule tracker';
+  }
+  document.getElementById('tabMonth').className='view-tab'+(view==='month'?' active':'');
+  document.getElementById('tabWeek').className='view-tab'+(view==='week'?' active':'');
+  if(view==='month'){
+    document.getElementById('periodLabel').textContent=`${MONTHS[monthMonth]} ${monthYear}`;
+  } else {
+    const we=new Date(weekStart);we.setDate(we.getDate()+6);
+    const s=weekStart,e=we;
+    document.getElementById('periodLabel').textContent=
+      s.getMonth()===e.getMonth()
+        ?`${MS[s.getMonth()]} ${s.getDate()}–${e.getDate()}, ${s.getFullYear()}`
+        :`${MS[s.getMonth()]} ${s.getDate()} – ${MS[e.getMonth()]} ${e.getDate()}, ${s.getFullYear()}`;
+  }
+}
+
+/* ── STATS ── */
+function renderStats(){
+  let vP=0,vS=0,pP=0,pS=0,tV=0,tP=0;
+  if(view==='month'){
+    const dim=new Date(monthYear,monthMonth+1,0).getDate();
+    for(let d=1;d<=dim;d++){
+      const date=new Date(monthYear,monthMonth,d);
+      const s=currentChar===-1?getOverallSt(date):getDaySt(date,currentChar);
+      vP+=s.vPosted;vS+=s.vSched;pP+=s.pPosted;pS+=s.pSched;tV+=s.totV;tP+=s.totP;
+    }
+  } else {
+    for(let i=0;i<7;i++){
+      const date=new Date(weekStart);date.setDate(date.getDate()+i);
+      const s=currentChar===-1?getOverallSt(date):getDaySt(date,currentChar);
+      vP+=s.vPosted;vS+=s.vSched;pP+=s.pPosted;pS+=s.pSched;tV+=s.totV;tP+=s.totP;
+    }
+  }
+  const period=view==='week'?'this week':'this month';
+  document.getElementById('statRow').innerHTML=`
+    <div class="stat-box"><strong style="color:#2a6e2a">${vP}/${tV}</strong>Videos posted ${period}</div>
+    <div class="stat-box"><strong style="color:#b07c00">${vS}/${tV}</strong>Videos scheduled</div>
+    <div class="stat-box"><strong style="color:#1e5a99">${pP}/${tP}</strong>Photos posted</div>
+    <div class="stat-box"><strong style="color:#b07c00">${pS}/${tP}</strong>Photos scheduled</div>`;
+}
+
+/* ── MINI BAR HELPER ── */
+function miniBarCell(st){
+  const vPostPct=pct(st.vPosted,st.totV);
+  const vSchedPct=pct(st.vSched,st.totV);
+  const pPostPct=pct(st.pPosted,st.totP||1);
+  const pSchedPct=pct(st.pSched,st.totP||1);
+  return`<div class="mini-bars">
+    <div class="mini-bg"><div class="mini-fill fv" style="width:${vPostPct}%"></div></div>
+    <div class="mini-bg"><div class="mini-fill fsched" style="width:${vSchedPct}%"></div></div>
+    ${st.totP>0?`<div class="mini-bg"><div class="mini-fill fp" style="width:${pPostPct}%"></div></div><div class="mini-bg"><div class="mini-fill fsched" style="width:${pSchedPct}%"></div></div>`:`<div class="mini-bg" style="background:#f8f8f8;"></div>`}
+  </div>`;
+}
+
+/* ── DAY CELL BARS (single char) ── */
+function dayCellBars(st,d){
+  const vPostPct=pct(st.vPosted,st.totV);
+  const vSchedPct=pct(st.vSched,st.totV);
+  const pPostPct=pct(st.pPosted,st.totP||1);
+  const pSchedPct=pct(st.pSched,st.totP||1);
+  return`<div class="trk-row">
+    <div class="trk-lbl">Vid <span style="color:${st.vPosted>0?'#2a6e2a':st.vSched>0?'#b07c00':'#bbb'}">${st.vPosted}✓${st.vSched>0?' '+st.vSched+'⏰':''}</span></div>
+    <div class="bar-bg" style="position:relative;">
+      <div class="bar-fill fv" style="width:${vPostPct}%;position:absolute;left:0;top:0;height:100%;"></div>
+      <div class="bar-fill fsched" style="width:${vSchedPct}%;position:absolute;left:${vPostPct}%;top:0;height:100%;opacity:.7;"></div>
+    </div>
+  </div>
+  ${isPhotoDay(d)?`<div class="trk-row">
+    <div class="trk-lbl">Pic <span style="color:${st.pPosted>0?'#1e5a99':st.pSched>0?'#b07c00':'#bbb'}">${st.pPosted}✓${st.pSched>0?' '+st.pSched+'⏰':''}</span></div>
+    <div class="bar-bg" style="position:relative;">
+      <div class="bar-fill fp" style="width:${pPostPct}%;position:absolute;left:0;top:0;height:100%;"></div>
+      <div class="bar-fill fsched" style="width:${pSchedPct}%;position:absolute;left:${pPostPct}%;top:0;height:100%;opacity:.7;"></div>
+    </div>
+  </div>`:`<div class="trk-row"><div class="trk-lbl" style="color:#e0e0e0;">Pic <span style="color:#e0e0e0;">—</span></div><div class="bar-bg" style="background:#f8f8f8;"></div></div>`}`;
+}
+
+/* ══ MONTHLY ══ */
+function renderMonthly(){
+  if(currentChar===-1){renderMonthlyOv();return;}
+  const first=new Date(monthYear,monthMonth,1).getDay();
+  const dim=new Date(monthYear,monthMonth+1,0).getDate();
+  let h=`<div class="cal-grid">`+DAYS.map(d=>`<div class="day-hdr">${d}</div>`).join('');
+  for(let i=0;i<first;i++)h+=`<div class="day-cell empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(monthYear,monthMonth,d);
+    const isT=date.getTime()===today.getTime();
+    const isSel=selectedDate&&date.getTime()===selectedDate.getTime();
+    const st=getDaySt(date,currentChar);
+    h+=`<div class="day-cell${isT?' istoday':''}${isSel?' issel':''}" onclick="selDate(new Date(${date.getTime()}))">
+      <div class="day-num">${d}</div>${dayCellBars(st,d)}</div>`;
+  }
+  h+=`</div>`;document.getElementById('calArea').innerHTML=h;
+}
+
+function renderMonthlyOv(){
+  const first=new Date(monthYear,monthMonth,1).getDay();
+  const dim=new Date(monthYear,monthMonth+1,0).getDate();
+  let h=`<div class="ov-grid">`+DAYS.map(d=>`<div class="day-hdr">${d}</div>`).join('');
+  for(let i=0;i<first;i++)h+=`<div class="ov-cell empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(monthYear,monthMonth,d);
+    const isT=date.getTime()===today.getTime();
+    const isSel=selectedDate&&date.getTime()===selectedDate.getTime();
+    let rows='';
+    for(let ci=0;ci<CHARS.length;ci++){
+      const st=getDaySt(date,ci);
+      rows+=`<div class="mini-row"><div class="mini-lbl">${CHARS[ci].substring(0,5)}</div>${miniBarCell(st)}</div>`;
+    }
+    h+=`<div class="ov-cell${isT?' istoday':''}${isSel?' issel-ov':''}" onclick="selDate(new Date(${date.getTime()}))">
+      <div class="ov-dnum">${d}</div>${rows}</div>`;
+  }
+  h+=`</div>`;document.getElementById('calArea').innerHTML=h;
+}
+
+/* ══ WEEKLY ══ */
+function renderWeekly(){
+  if(currentChar===-1){renderWeeklyOv();return;}
+  let h=`<div class="week-grid">`;
+  for(let i=0;i<7;i++){
+    const date=new Date(weekStart);date.setDate(date.getDate()+i);
+    const isT=date.getTime()===today.getTime();
+    const isSel=selectedDate&&date.getTime()===selectedDate.getTime();
+    const d=date.getDate();
+    const st=getDaySt(date,currentChar);
+    const vPostPct=pct(st.vPosted,st.totV),vSchedPct=pct(st.vSched,st.totV);
+    const pPostPct=pct(st.pPosted,st.totP||1),pSchedPct=pct(st.pSched,st.totP||1);
+    h+=`<div class="week-col${isT?' istoday':''}${isSel?' issel':''}" onclick="selDate(new Date(${date.getTime()}))">
+      <div class="wk-top"><div class="wk-dayname">${DAYS[i]}</div><div class="wk-dnum">${d}</div><div class="wk-mon">${MS[date.getMonth()]} ${date.getFullYear()}</div></div>
+      <div class="wk-body">
+        <div class="wk-trk">
+          <div class="wk-trk-lbl">Videos <span style="color:${st.vPosted>0?'#2a6e2a':st.vSched>0?'#b07c00':'#999'}">${st.vPosted} posted · ${st.vSched} sched</span></div>
+          <div class="wk-bar-bg" style="position:relative;">
+            <div class="wk-bar-fill fv" style="width:${vPostPct}%;position:absolute;left:0;top:0;height:100%;"></div>
+            <div class="wk-bar-fill fsched" style="width:${vSchedPct}%;position:absolute;left:${vPostPct}%;top:0;height:100%;opacity:.7;"></div>
+          </div>
+        </div>
+        ${isPhotoDay(d)?`<div class="wk-trk">
+          <div class="wk-trk-lbl">Photos <span style="color:${st.pPosted>0?'#1e5a99':st.pSched>0?'#b07c00':'#999'}">${st.pPosted} posted · ${st.pSched} sched</span></div>
+          <div class="wk-bar-bg" style="position:relative;">
+            <div class="wk-bar-fill fp" style="width:${pPostPct}%;position:absolute;left:0;top:0;height:100%;"></div>
+            <div class="wk-bar-fill fsched" style="width:${pSchedPct}%;position:absolute;left:${pPostPct}%;top:0;height:100%;opacity:.7;"></div>
+          </div>
+        </div>`:`<div class="wk-nophoto">No photo today</div>`}
+      </div>
+    </div>`;
+  }
+  h+=`</div>`;document.getElementById('calArea').innerHTML=h;
+}
+
+function renderWeeklyOv(){
+  let h=`<div class="wov-grid">`;
+  for(let i=0;i<7;i++){
+    const date=new Date(weekStart);date.setDate(date.getDate()+i);
+    const isT=date.getTime()===today.getTime();
+    const isSel=selectedDate&&date.getTime()===selectedDate.getTime();
+    const d=date.getDate();
+    let rows='';
+    for(let ci=0;ci<CHARS.length;ci++){
+      const st=getDaySt(date,ci);
+      rows+=`<div class="wov-crow"><div class="wov-clbl">${CHARS[ci].substring(0,5)}</div>${miniBarCell(st)}</div>`;
+    }
+    h+=`<div class="wov-col${isT?' istoday':''}${isSel?' issel-ov':''}" onclick="selDate(new Date(${date.getTime()}))">
+      <div class="wov-top"><div class="wk-dayname" style="font-size:9px;">${DAYS[i]}</div><div class="wov-dnum">${d}</div><div class="wov-dsub">${MS[date.getMonth()]}</div></div>
+      <div class="wov-body">${rows}</div>
+    </div>`;
+  }
+  h+=`</div>`;document.getElementById('calArea').innerHTML=h;
+}
+
+/* ══ DETAIL ══ */
+function renderDetail(){
+  const panel=document.getElementById('detailPanel');
+  if(!selectedDate){panel.innerHTML=`<div class="detail"><p class="no-sel">Select a day to view or log posts</p></div>`;return;}
+  if(currentChar===-1){renderOvDetail(selectedDate);return;}
+  const d=selectedDate.getDate(),m=selectedDate.getMonth(),y=selectedDate.getFullYear();
+  const md=getMD(currentChar,y,m);
+  const e=(md[d])||{};
+  const s=getSched(d);
+  const st=getDaySt(selectedDate,currentChar);
+  const dateStr=`${MONTHS[m]} ${d}, ${y}`;
+
+  const dStats=`<div class="detail-top">
+    <div class="dstat"><div class="dstat-lbl">Videos</div>
+      <div class="dstat-val" style="color:#2a6e2a">${st.vPosted} posted</div>
+      <div style="font-size:11px;color:#b07c00;margin-top:2px;">${st.vSched} scheduled</div>
+      <div class="dbar-bg" style="position:relative;">
+        <div class="dbar-fill fv" style="width:${pct(st.vPosted,st.totV)}%;position:absolute;left:0;top:0;height:100%;"></div>
+        <div class="dbar-fill fsched" style="width:${pct(st.vSched,st.totV)}%;position:absolute;left:${pct(st.vPosted,st.totV)}%;top:0;height:100%;opacity:.7;"></div>
+      </div>
+    </div>
+    ${st.totP>0?`<div class="dstat"><div class="dstat-lbl">Photos</div>
+      <div class="dstat-val" style="color:#1e5a99">${st.pPosted} posted</div>
+      <div style="font-size:11px;color:#b07c00;margin-top:2px;">${st.pSched} scheduled</div>
+      <div class="dbar-bg" style="position:relative;">
+        <div class="dbar-fill fp" style="width:${pct(st.pPosted,st.totP)}%;position:absolute;left:0;top:0;height:100%;"></div>
+        <div class="dbar-fill fsched" style="width:${pct(st.pSched,st.totP)}%;position:absolute;left:${pct(st.pPosted,st.totP)}%;top:0;height:100%;opacity:.7;"></div>
+      </div>
+    </div>`:`<div class="dstat" style="opacity:.4;"><div class="dstat-lbl">Photos</div><div class="dstat-val" style="color:#999;">No photo day</div></div>`}
+    <div class="dstat"><div class="dstat-lbl">Total Posted</div>
+      <div class="dstat-val">${st.vPosted+st.pPosted}/${st.totV+st.totP}</div>
+      <div class="dbar-bg"><div class="dbar-fill" style="width:${pct(st.vPosted+st.pPosted,st.totV+st.totP)}%;background:#a070cc;"></div></div>
+    </div>
+  </div>`;
+
+  const rows=VP.map(p=>{
+    const hasP=s.photo.includes(p);
+    const vSt=e[p]?e[p].video||null:null;
+    const pSt=hasP?(e[p]?e[p].photo||null:null):null;
+    const vBadge=vSt==='posted'?`<span class="badge-posted">Posted</span>`:vSt==='scheduled'?`<span class="badge-sched">Scheduled</span>`:`<span class="badge-none">None</span>`;
+    const pBadge=hasP?(pSt==='posted'?`<span class="badge-posted">Posted</span>`:pSt==='scheduled'?`<span class="badge-sched">Scheduled</span>`:`<span class="badge-none">None</span>`):'';
+    return`<tr>
+      <td style="font-weight:500;">${p}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:#888;">Video:</span>${vBadge}
+          <button class="status-btn${vSt==='scheduled'?' s-sched':''}" onclick="toggle(${currentChar},'${p}','video','scheduled',${y},${m},${d})">⏰ Sched</button>
+          <button class="status-btn${vSt==='posted'?' s-posted':''}" onclick="toggle(${currentChar},'${p}','video','posted',${y},${m},${d})">✓ Posted</button>
+        </div>
+        ${hasP?`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px;">
+          <span style="font-size:11px;color:#888;">Photo:</span>${pBadge}
+          <button class="status-btn${pSt==='scheduled'?' s-sched':''}" onclick="toggle(${currentChar},'${p}','photo','scheduled',${y},${m},${d})">⏰ Sched</button>
+          <button class="status-btn${pSt==='posted'?' s-posted':''}" onclick="toggle(${currentChar},'${p}','photo','posted',${y},${m},${d})">✓ Posted</button>
+        </div>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  panel.innerHTML=`<div class="detail"><h2>${CHARS[currentChar]} — ${dateStr}</h2>${dStats}
+    <table class="plat-table"><thead><tr><th>Platform</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+function renderOvDetail(date){
+  const d=date.getDate(),m=date.getMonth(),y=date.getFullYear();
+  const dateStr=`${MONTHS[m]} ${d}, ${y}`;
+  const ov=getOverallSt(date);
+  const sumStats=`<div class="detail-top">
+    <div class="dstat"><div class="dstat-lbl">All Videos</div>
+      <div class="dstat-val" style="color:#2a6e2a">${ov.vPosted} posted</div>
+      <div style="font-size:11px;color:#b07c00;margin-top:2px;">${ov.vSched} scheduled</div>
+      <div class="dbar-bg" style="position:relative;">
+        <div class="dbar-fill fv" style="width:${pct(ov.vPosted,ov.totV)}%;position:absolute;left:0;top:0;height:100%;"></div>
+        <div class="dbar-fill fsched" style="width:${pct(ov.vSched,ov.totV)}%;position:absolute;left:${pct(ov.vPosted,ov.totV)}%;top:0;height:100%;opacity:.7;"></div>
+      </div>
+    </div>
+    ${ov.totP>0?`<div class="dstat"><div class="dstat-lbl">All Photos</div>
+      <div class="dstat-val" style="color:#1e5a99">${ov.pPosted} posted</div>
+      <div style="font-size:11px;color:#b07c00;margin-top:2px;">${ov.pSched} scheduled</div>
+      <div class="dbar-bg" style="position:relative;">
+        <div class="dbar-fill fp" style="width:${pct(ov.pPosted,ov.totP)}%;position:absolute;left:0;top:0;height:100%;"></div>
+        <div class="dbar-fill fsched" style="width:${pct(ov.pSched,ov.totP)}%;position:absolute;left:${pct(ov.pPosted,ov.totP)}%;top:0;height:100%;opacity:.7;"></div>
+      </div>
+    </div>`:`<div class="dstat" style="opacity:.4;"><div class="dstat-lbl">Photos</div><div class="dstat-val" style="color:#999;">No photo day</div></div>`}
+    <div class="dstat"><div class="dstat-lbl">Total Posted</div>
+      <div class="dstat-val">${ov.vPosted+ov.pPosted}/${ov.totV+ov.totP}</div>
+      <div class="dbar-bg"><div class="dbar-fill" style="width:${pct(ov.vPosted+ov.pPosted,ov.totV+ov.totP)}%;background:#a070cc;"></div></div>
+    </div>
+  </div>`;
+  const s=getSched(d);
+  let cards=`<div class="ov-det-grid">`;
+  for(let ci=0;ci<CHARS.length;ci++){
+    const md=getMD(ci,y,m);const e=(md[d])||{};const st=getDaySt(date,ci);
+    let btns='';
+    VP.forEach(p=>{
+      const hasP=s.photo.includes(p),vSt=e[p]?e[p].video||null:null,pSt=hasP?(e[p]?e[p].photo||null:null):null;
+      btns+=`<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;font-size:10px;">
+        <span style="min-width:60px;color:#666;">${p}</span>
+        <button class="status-btn${vSt==='scheduled'?' s-sched':''}" style="padding:2px 5px;font-size:9px;" onclick="toggle(${ci},'${p}','video','scheduled',${y},${m},${d})">⏰V</button>
+        <button class="status-btn${vSt==='posted'?' s-posted':''}" style="padding:2px 5px;font-size:9px;" onclick="toggle(${ci},'${p}','video','posted',${y},${m},${d})">✓V</button>
+        ${hasP?`<button class="status-btn${pSt==='scheduled'?' s-sched':''}" style="padding:2px 5px;font-size:9px;" onclick="toggle(${ci},'${p}','photo','scheduled',${y},${m},${d})">⏰P</button>
+        <button class="status-btn${pSt==='posted'?' s-posted':''}" style="padding:2px 5px;font-size:9px;" onclick="toggle(${ci},'${p}','photo','posted',${y},${m},${d})">✓P</button>`:''}
+      </div>`;
+    });
+    cards+=`<div class="ov-ccard">
+      <div class="ov-cname">${CHARS[ci]}</div>
+      <div class="ov-cbar-row"><div class="ov-cbar-lbl"><span>Videos</span><span style="color:#2a6e2a;">${st.vPosted} posted · <span style="color:#b07c00;">${st.vSched} sched</span></span></div>
+        <div class="ov-cbar-bg" style="position:relative;">
+          <div class="ov-cbar-fill fv" style="width:${pct(st.vPosted,st.totV)}%;position:absolute;left:0;top:0;height:100%;"></div>
+          <div class="ov-cbar-fill fsched" style="width:${pct(st.vSched,st.totV)}%;position:absolute;left:${pct(st.vPosted,st.totV)}%;top:0;height:100%;opacity:.7;"></div>
+        </div>
+      </div>
+      ${st.totP>0?`<div class="ov-cbar-row"><div class="ov-cbar-lbl"><span>Photos</span><span style="color:#1e5a99;">${st.pPosted} posted · <span style="color:#b07c00;">${st.pSched} sched</span></span></div>
+        <div class="ov-cbar-bg" style="position:relative;">
+          <div class="ov-cbar-fill fp" style="width:${pct(st.pPosted,st.totP)}%;position:absolute;left:0;top:0;height:100%;"></div>
+          <div class="ov-cbar-fill fsched" style="width:${pct(st.pSched,st.totP)}%;position:absolute;left:${pct(st.pPosted,st.totP)}%;top:0;height:100%;opacity:.7;"></div>
+        </div>
+      </div>`:'<div style="font-size:10px;color:#ccc;margin-top:2px;">No photo today</div>'}
+      <details style="margin-top:8px;"><summary style="font-size:10px;color:#999;cursor:pointer;user-select:none;">Log posts</summary><div style="margin-top:6px;">${btns}</div></details>
+    </div>`;
+  }
+  cards+=`</div>`;
+  document.getElementById('detailPanel').innerHTML=`<div class="detail"><h2>All Characters — ${dateStr}</h2>${sumStats}${cards}</div>`;
+}
+
+/* ── ACTIONS ── */
+async function selDate(date){
+  selectedDate=date;
+  const y=date.getFullYear(),m=date.getMonth();
+  const chars=currentChar===-1?CHARS.map((_,i)=>i):[currentChar];
+  await Promise.all(chars.map(ci=>ensureLoaded(ci,y,m)));
+  renderCal();renderDetail();
+}
+
+function renderCal(){if(view==='month')renderMonthly();else renderWeekly();}
+
+async function toggle(ci,plat,type,status,y,m,d){
+  await ensureLoaded(ci,y,m);
+  const md=getMD(ci,y,m);
+  if(!md[d])md[d]={};
+  if(!md[d][plat])md[d][plat]={};
+  // clicking same status toggles it off
+  md[d][plat][type]=md[d][plat][type]===status?null:status;
+  setMD(ci,y,m,md);
+  await saveM(ci,y,m,md);
+  renderStats();renderCal();renderDetail();
+}
+
+async function switchChar(i){currentChar=i;selectedDate=null;await loadCurrentRange();renderAll();}
+async function setView(v){view=v;selectedDate=null;if(v==='week')weekStart=getWeekStart(new Date(monthYear,monthMonth,1));await loadCurrentRange();renderAll();}
+
+async function navBack(){
+  if(view==='month'){monthMonth--;if(monthMonth<0){monthMonth=11;monthYear--;}}
+  else{weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()-7);monthYear=weekStart.getFullYear();monthMonth=weekStart.getMonth();}
+  selectedDate=null;await loadCurrentRange();renderAll();
+}
+async function navFwd(){
+  if(view==='month'){monthMonth++;if(monthMonth>11){monthMonth=0;monthYear++;}}
+  else{weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()+7);monthYear=weekStart.getFullYear();monthMonth=weekStart.getMonth();}
+  selectedDate=null;await loadCurrentRange();renderAll();
+}
+async function loadCurrentRange(){
+  if(view==='month'){await ensureRange(monthYear,monthMonth,monthYear,monthMonth);}
+  else{const we=new Date(weekStart);we.setDate(we.getDate()+6);await ensureRange(weekStart.getFullYear(),weekStart.getMonth(),we.getFullYear(),we.getMonth());}
+}
+function renderAll(){renderHeader();renderSidebar();renderStats();renderCal();renderDetail();}
+(async()=>{await loadCurrentRange();renderAll();})();
+</script>
